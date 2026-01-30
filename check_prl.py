@@ -1,7 +1,7 @@
 import requests
 
 URL = "https://www.prl.res.in/prl-eng/advertisement"
-KEYWORDS = ["result", "written test result", "selection"]
+KEYWORDS = ["result", "written test result", "selection","Technical Assistance"]
 
 BOT_TOKEN = "8410171083:AAH6ivYb2vE3nazTIjOihNuDIaJdGZIAPPc"
 CHAT_ID = "2043365711"
