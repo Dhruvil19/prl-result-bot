@@ -1,20 +1,30 @@
 import requests
 
-URL = "https://www.prl.res.in/prl-eng/advertisement"
-KEYWORDS = ["result", "written test result", "selection"]
+# URL = "https://www.prl.res.in/prl-eng/advertisement"
+# KEYWORDS = ["result", "written test result", "selection"]
 
 BOT_TOKEN = "8410171083:AAH6ivYb2vE3nazTIjOihNuDIaJdGZIAPPc"
 CHAT_ID = "2043365711"
+telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+requests.post(
+    telegram_url,
+    data={
+        "chat_id": CHAT_ID,
+        "text": "✅ TEST MESSAGE: PRL BOT is working!"
+    }
+)
 
-headers = {"User-Agent": "Mozilla/5.0"}
+print("Test message sent")
 
-page = requests.get(URL, headers=headers).text.lower()
+# headers = {"User-Agent": "Mozilla/5.0"}
 
-for word in KEYWORDS:
-    if word in page:
-        telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-        requests.post(telegram_url, data={
-            "chat_id": CHAT_ID,
-            "text": "🚨 PRL RESULT UPDATE FOUND!\nhttps://www.prl.res.in/prl-eng/advertisement"
-        })
-        break
+# page = requests.get(URL, headers=headers).text.lower()
+
+# for word in KEYWORDS:
+#     if word in page:
+#         telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+#         requests.post(telegram_url, data={
+#             "chat_id": CHAT_ID,
+#             "text": "🚨 PRL RESULT UPDATE FOUND!\nhttps://www.prl.res.in/prl-eng/advertisement"
+#         })
+#         break
