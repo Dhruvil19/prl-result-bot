@@ -1,44 +1,47 @@
 import requests
-import hashlib
 import os
-from bs4 import BeautifulSoup
 
 URL = "https://www.prl.res.in/prl-eng/advertisement"
-STATE_FILE = "last_hash.txt"
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-CHAT_ID = os.environ.get("CHAT_ID")
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+CHAT_ID = os.environ["CHAT_ID"]
 
-headers = {"User-Agent": "Mozilla/5.0"}
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+}
 
-response = requests.get(URL, headers=headers, timeout=20)
+try:
+    r = requests.get(URL, headers=headers, timeout=30)
+    r.raise_for_status()
+    page = r.text.lower()
+except Exception as e:
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        data={"chat_id": CHAT_ID, "text": f"❌ PRL site access error:\n{e}"}
+    )
+    exit()
 
-soup = BeautifulSoup(response.text, "html.parser")
+KEYWORDS = [
+    "result",
+    "written test",
+    "technical assistant",
+    "advt",
+    "notification",
+]
 
-# 🔍 ONLY advertisement section extract
-ads_section = soup.get_text(strip=True)
-
-# 🔐 Hash only meaningful content
-current_hash = hashlib.sha256(ads_section.encode()).hexdigest()
-
-# 📂 Load old hash
-old_hash = None
-if os.path.exists(STATE_FILE):
-    with open(STATE_FILE, "r") as f:
-        old_hash = f.read().strip()
-
-# 💾 Save hash
-with open(STATE_FILE, "w") as f:
-    f.write(current_hash)
-
-# 🚨 Alert only on REAL change
-if old_hash and old_hash != current_hash:
+if any(word in page for word in KEYWORDS):
     requests.post(
         f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
         data={
             "chat_id": CHAT_ID,
-            "text": "🚨 PRL Advertisement UPDATED!\n\nCheck:\nhttps://www.prl.res.in/prl-eng/advertisement"
-        },
-        timeout=20
+            "text": "🚨 PRL UPDATE POSSIBLE!\nCheck website:\nhttps://www.prl.res.in/prl-eng/advertisement"
+        }
     )
-
+else:
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        data={
+            "chat_id": CHAT_ID,
+            "text": "✅ PRL checked — no update yet"
+        }
+    )
