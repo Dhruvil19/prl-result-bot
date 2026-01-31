@@ -1,6 +1,7 @@
 import requests
 import hashlib
 import os
+from bs4 import BeautifulSoup
 
 URL = "https://www.prl.res.in/prl-eng/advertisement"
 STATE_FILE = "last_hash.txt"
@@ -11,30 +12,33 @@ CHAT_ID = os.environ.get("CHAT_ID")
 headers = {"User-Agent": "Mozilla/5.0"}
 
 response = requests.get(URL, headers=headers, timeout=20)
-content = response.text
 
-# 🔐 Create hash of page content
-current_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+soup = BeautifulSoup(response.text, "html.parser")
 
-# 📂 Load previous hash
+# 🔍 ONLY advertisement section extract
+ads_section = soup.get_text(strip=True)
+
+# 🔐 Hash only meaningful content
+current_hash = hashlib.sha256(ads_section.encode()).hexdigest()
+
+# 📂 Load old hash
+old_hash = None
 if os.path.exists(STATE_FILE):
     with open(STATE_FILE, "r") as f:
         old_hash = f.read().strip()
-else:
-    old_hash = None
 
-# 🔁 Save current hash for next run
+# 💾 Save hash
 with open(STATE_FILE, "w") as f:
     f.write(current_hash)
 
-# 🚨 Notify ONLY if page actually changed
-if old_hash and current_hash != old_hash:
-    telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+# 🚨 Alert only on REAL change
+if old_hash and old_hash != current_hash:
     requests.post(
-        telegram_url,
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
         data={
             "chat_id": CHAT_ID,
-            "text": "🚨 PRL WEBSITE UPDATED!\n\nCheck now:\nhttps://www.prl.res.in/prl-eng/advertisement"
+            "text": "🚨 PRL Advertisement UPDATED!\n\nCheck:\nhttps://www.prl.res.in/prl-eng/advertisement"
         },
         timeout=20
     )
+
