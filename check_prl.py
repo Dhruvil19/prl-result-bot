@@ -38,9 +38,3 @@ if old_hash and current_hash != old_hash:
         },
         timeout=20
     )
-telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-requests.post(
-    telegram_url,
-    data={"chat_id": CHAT_ID, "text": "✅ TEST SUCCESS: PRL bot is running fine"},
-    timeout=20
-)
